@@ -27,26 +27,16 @@ async  def videoReduce(folder):
                 # 解析输出结果获取宽度和高度
                 stream_info = json.loads(probe_result.stdout)
 
-                if 'streams' in stream_info and len(stream_info['streams']) >= 2:
-                    # 检查第一个流是否有 'width' 键
-                    if 'width' in stream_info['streams'][0]:
-                        width = stream_info['streams'][0]['width']
-                    else:
-                        # 如果第一个流没有 'width' 键，检查第二个流
-                        width = stream_info['streams'][1].get('width', None)
+                # 遍历流以找到视频流
+                video_stream = None
+                for stream in stream_info['streams']:
+                    if stream.get('codec_type') == 'video':
+                        video_stream = stream
+                        break
 
-                    # 检查第一个流是否有 'height' 键
-                    if 'height' in stream_info['streams'][0]:
-                        height = stream_info['streams'][0]['height']
-                    else:
-                        # 如果第一个流没有 'width' 键，检查第二个流
-                        height = stream_info['streams'][1].get('height', None)
-                else:
-                    # 如果 'streams' 不存在或列表中的元素不足两个，设置默认值或进行其他处理
-                    width = None
-                    height = None
-
-                print(f'with width: {width} and height: {height}')
+                width = video_stream['width']
+                height = video_stream['height']
+                print(f"Width: {width}, Height: {height}")
             except subprocess.CalledProcessError as e:
                 print(f'无法获取 {filename} 的元数据: {e}')
                 continue
